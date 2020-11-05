@@ -17,6 +17,7 @@ public class RandomindianName {
         year = s.nextInt();
         month = s.nextInt();
         day = s.nextInt();
+
         s.close();
     }
 
