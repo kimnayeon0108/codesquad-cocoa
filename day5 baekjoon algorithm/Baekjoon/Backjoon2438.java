@@ -1,8 +1,8 @@
-package Baekjoon1000;
+package Baekjoon;
 
 import java.util.Scanner;
 
-public class Backjoon3 {
+public class Backjoon2438 {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         int num = input.nextInt();
