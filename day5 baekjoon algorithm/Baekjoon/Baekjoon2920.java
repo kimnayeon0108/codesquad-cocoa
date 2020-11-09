@@ -2,7 +2,7 @@ package Baekjoon;
 
 import java.util.Scanner;
 
-public class Backjoon2920 {
+public class Baekjoon2920 {
       public static void main(String[] args) {
 
           int[] numbers  = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -12,7 +12,7 @@ public class Backjoon2920 {
           Scanner s = new Scanner(System.in);
 
           int [] input = new int [8];
-          for(int i = 0; i < numbers.length; i++ ){
+          for(int i = 0; i < input.length; i++){
               input[i] = s.nextInt();
           }
           s.close();

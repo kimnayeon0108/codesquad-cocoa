@@ -2,7 +2,7 @@ package Baekjoon;
 
 import java.util.Scanner;
 
-public class Backjoon1000 {
+public class Baekjoon1000 {
         public static void main(String[] args) {
             Scanner input = new Scanner(System.in);
             int a = input.nextInt();
