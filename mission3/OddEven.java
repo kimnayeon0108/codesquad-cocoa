@@ -19,9 +19,7 @@ class OddEven {
 
     public static String whatIsResult() {
         Random rand = new Random();
-        int min = 1;
-        int max = 20;
-        int randomNum = rand.nextInt((max - min) + 1 + min);
+        int randomNum = rand.nextInt(20) + 1;
         if (randomNum % 2 == 0) {
             result = "짝";
         }
