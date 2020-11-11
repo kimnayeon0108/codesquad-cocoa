@@ -1,6 +1,7 @@
 package OddEven;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -14,8 +15,27 @@ class Opponent {
     int amount = 120;
 }
 
-class SaveGame extends OddEven{
+class SaveData {
+    ArrayList<Player> playerList = new ArrayList<Player>();
+    File file = new File("/Users/kimnayeon/codesquad-cocoa/mission3/OddEven/player.txt");
 
+    public void fileCreate() {
+        try {
+            if (file.exists()) {
+                file.canWrite();
+            }
+        } catch (Exception e) {
+            System.out.println("생성 오류 발생");
+        }
+    }
+
+    public ArrayList<Player> fileRead() {
+        
+    }
+
+    public void fileWrite(ArrayList<Player> arrayList){
+
+    }
 }
 
 class OddEven {
@@ -45,7 +65,7 @@ class OddEven {
         Scanner s = new Scanner(System.in);
 
         while (p1.amount > 0 && o1.amount > 0 && numStage < maxStage) {
-            System.out.println("베팅금액을 입력하시오. 보유 금액: " + p1.amount);
+            System.out.println("베팅금액을 입력하시오.");
             int bettingAmount = s.nextInt();
             numTurn++;
 
@@ -62,12 +82,12 @@ class OddEven {
                 System.out.println("맞았습니다!");
                 p1.amount += bettingAmount;
                 o1.amount -= bettingAmount;
-                System.out.println("보유 금액: " + p1.amount);
+                System.out.println(bettingAmount + "을 획득했습니다.\n보유 금액: " + p1.amount);
             } else {
                 System.out.println("틀렸습니다!");
                 p1.amount -= bettingAmount;
                 o1.amount += bettingAmount;
-                System.out.println("보유 금액: " + p1.amount);
+                System.out.println(bettingAmount + "을 루징하였습니다.\n보유 금액: " + p1.amount);
             }
 
             // 새로운 상대 생성
@@ -91,48 +111,29 @@ class OddEven {
         }
     }
 
-    public void createPlayer(){
+    public void createPlayer() {
+        // 같은 이름의 사용자가 있으면 오류가 뜨고, 새로 생성하는 메세지 호출하기
         System.out.println("이름을 입력하시오.");
         Scanner s = new Scanner(System.in);
         p1.name = s.next();
-        System.out.println("보유 금액: " + p1.amount);
+        System.out.println("보유 금액: " + p1.amount + "이 생성되었습니다.\n게임을 시작합니다.");
         System.out.println("------------------");
     }
 
-    public void saveData(){
-        File file = new File("/Users/kimnayeon/codesquad-cocoa/mission3/OddEven/player.txt");
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write(p1.name + " " + numTurn + " " + p1.amount);
-            bw.close();
-        } catch (IOException ioException) {
-            System.out.println(ioException);
-        }
-
-        String line;
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 }
 
-class Main{
+class Main {
     public static void main(String[] args) {
         OddEven oe = new OddEven();
+        SaveData sd = new SaveData();
 
+        System.out.println("홀짝 게임에 오신것을 환영합니다. \n사용자를 등록해주세요.");
+        System.out.println("-----------------");
         oe.createPlayer();
         oe.play();
-        oe.saveData();
+        sd.fileCreate();
+        sd.fileRead();
     }
 }
 
