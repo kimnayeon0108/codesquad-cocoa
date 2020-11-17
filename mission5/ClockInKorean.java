@@ -1,17 +1,14 @@
+
 public class ClockInKorean {
+
     public static void main(String[] args) {
-        Display display = new Display();
         Current current = new Current();
+        Time time = new Time(current);
 
-        display.displayAllTime();
-        current.markingHour(display);
-        current.markingMinute(display);
-
-        for(int i = 0; i < display.clock.size(); i++){
-            System.out.print(display.clock.get(i) + " ");
-        }
+        time.start();
 
     }
+
 }
 
 
