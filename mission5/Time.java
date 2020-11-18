@@ -1,5 +1,8 @@
+import java.util.Calendar;
+
 public class Time extends Thread {
     Current current;
+    Calendar c = Calendar.getInstance();
 
     public Time(Current current) {
         this.current = current;
@@ -9,7 +12,12 @@ public class Time extends Thread {
     public void run() {
         while (true) {
             current.getTime();
-            current.marking();
+
+            try {
+                Thread.sleep(60000 - c.get(Calendar.SECOND));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
     }
