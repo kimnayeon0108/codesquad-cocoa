@@ -12,7 +12,6 @@ public class Time extends Thread {
         this.hour = cal.get(Calendar.HOUR);
         this.minute = cal.get(Calendar.MINUTE);
 
-        marking();
     }
 
     public void marking() {
@@ -152,8 +151,9 @@ public class Time extends Thread {
     @Override
     public void run() {
         while (true) {
-            getTime();
             try {
+                getTime();
+                marking();
                 join(60000 - Calendar.MILLISECOND);
             } catch (InterruptedException e) {
                 e.printStackTrace();

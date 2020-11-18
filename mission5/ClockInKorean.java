@@ -2,19 +2,18 @@ import java.util.Calendar;
 import java.util.Scanner;
 
 public class ClockInKorean {
+    Time time = new Time();
+    Calendar1 calendar1 = new Calendar1();
+    Scanner s = new Scanner(System.in);
+    Calendar c = Calendar.getInstance();
+    int year;
+    int month;
 
-    public static void main(String[] args) {
-        Time time = new Time();
-        Calendar1 calendar1 = new Calendar1();
-        Scanner s = new Scanner(System.in);
-        Calendar c = Calendar.getInstance();
-        int year;
-        int month;
-
+    public void input(){
         System.out.println("시계를 보려면 \"clock\" 달력을 보려면 \"cal\"을 입력해주세요.");
         String input = s.nextLine();
         if(input.equals("clock")) {
-                time.start();
+            time.start();
         }
         if(input.equals("cal")) {
             calendar1.print(c.get(Calendar.YEAR), c.get(Calendar.MONTH));
@@ -24,6 +23,13 @@ public class ClockInKorean {
 
             calendar1.print(year, month - 1);
         }
+
+    }
+
+    public static void main(String[] args) {
+        ClockInKorean c1 = new ClockInKorean();
+        c1.input();
+
     }
 
 }
