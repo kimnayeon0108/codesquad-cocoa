@@ -5,7 +5,7 @@ public class Calendar1 {
     int lastDay;  // 월마다 일 수 가 달라
     int day;
     Calendar cal = Calendar.getInstance();
-    String[] weeks = {" 일", " 월", " 화", "수", " 목", " 금", "토"};
+    String[] weeks = {"일", "월", "화", "수", "목", "금", "토"};
     int width = 7;
     int row = 6;
     String[][] template;
@@ -36,18 +36,14 @@ public class Calendar1 {
         System.out.println(cal.get(Calendar.YEAR) + "년\t" + (cal.get(Calendar.MONTH) + 1) + "월");
         System.out.println("------------------------------");
 
-        for(String a : weeks){
-            System.out.print(a + "  ");
+        for (String a : weeks) {
+            System.out.printf("%s \t", a);
         }
         System.out.println();
 
         for (int i = 0; i < template.length; i++) {
             for (int j = 0; j < template[i].length; j++) {
-                if (template[i][j].length() == 1) {
-                    System.out.print("  " + template[i][j] + " ");
-                } else {
-                    System.out.print(" " + template[i][j] + " ");
-                }
+                System.out.printf("%s \t", template[i][j]);
             }
             System.out.println();
         }
