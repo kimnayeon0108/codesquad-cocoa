@@ -1,4 +1,6 @@
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Scanner;
 
 public class ClockInKorean {
@@ -9,11 +11,13 @@ public class ClockInKorean {
     int year;
     int month;
 
+
     public void input(){
         System.out.println("시계를 보려면 \"clock\" 달력을 보려면 \"cal\"을 입력해주세요.");
         String input = s.nextLine();
         if(input.equals("clock")) {
-            time.start();
+                time.start();
+
         }
         if(input.equals("cal")) {
             calendar1.print(c.get(Calendar.YEAR), c.get(Calendar.MONTH));
@@ -28,6 +32,7 @@ public class ClockInKorean {
 
     public static void main(String[] args) {
         ClockInKorean c1 = new ClockInKorean();
+
         c1.input();
 
     }

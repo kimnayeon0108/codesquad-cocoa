@@ -1,4 +1,6 @@
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class Time extends Thread {
     int hour;
@@ -11,6 +13,8 @@ public class Time extends Thread {
 
         this.hour = cal.get(Calendar.HOUR);
         this.minute = cal.get(Calendar.MINUTE);
+
+        marking();
 
     }
 
@@ -51,7 +55,7 @@ public class Time extends Thread {
                 clock[1] = ANSI_BLUE + clock[1] + ANSI_RESET;
                 break;
             case 3:
-                clock[2] = ANSI_BLUE + clock[3] + ANSI_RESET;
+                clock[2] = ANSI_BLUE + clock[2] + ANSI_RESET;
                 break;
             case 4:
                 clock[3] = ANSI_BLUE + clock[3] + ANSI_RESET;
@@ -151,13 +155,15 @@ public class Time extends Thread {
     @Override
     public void run() {
         while (true) {
+            Calendar cal = Calendar.getInstance();
+            long currentSecond = cal.get(Calendar.SECOND) * 1000;
+            getTime();
             try {
-                getTime();
-                marking();
-                join(60000 - Calendar.MILLISECOND);
+                sleep(60000 - currentSecond);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
+
 }
