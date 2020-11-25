@@ -17,16 +17,19 @@ public class GraphicsEx1 extends Frame {
 
         g.drawOval(50, 100, 50, 50);
         g.setColor(Color.blue);
-        g.fillOval(100, 100, 150, 150);
 
+        g.fillOval(100, 100, 150, 150);
         g.setColor(Color.red);
+
         g.drawLine(100, 100, 150, 150);
 
         g.fillRoundRect(200, 100, 120, 80, 30, 30);
         g.setColor(Color.orange);
+
         g.fillPolygon(new int[]{50, 100, 150, 200},
                 new int[]{250, 200, 200, 250}, 4);
         g.setColor(Color.cyan);
+
         g.fillArc(250, 200, 100, 100, 0, 120);
     }
 
