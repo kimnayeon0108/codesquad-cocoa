@@ -1,19 +1,17 @@
 package drawingBoard;
 
-import javafx.event.EventHandler;
-
 import java.awt.*;
 import java.awt.event.*;
 
 public class DrawingBoard extends Frame implements MouseMotionListener {
-    int x = 0;
-    int y = 0;
-    Panel p;
-    Checkbox[] boxShape = new Checkbox[4];
-    Checkbox[] boxColor = new Checkbox[3];
+    private int x = 0;
+    private int y = 0;
+    private Panel p;
+    private Checkbox[] boxShape = new Checkbox[4];
+    private Checkbox[] boxColor = new Checkbox[3];
 
-    Image img = null;
-    Graphics gImg = null;
+    private Image img = null;
+    private Graphics gImg = null;
 
     public DrawingBoard(String title) {
         super(title);
