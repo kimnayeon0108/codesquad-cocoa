@@ -43,7 +43,7 @@ public class GraphicsEx4 extends Frame implements MouseMotionListener {
     public void mouseMoved(MouseEvent me) {}
 
     public void mouseDragged(MouseEvent me) {
-        // 마우스를 누른 상태로 포인터를 이동했을 때만 그림이 그려지도록 함 
+        // 마우스를 누른 상태로 포인터를 이동했을 때만 그림이 그려지도록 함
         if (me.getModifiersEx() == MouseEvent.BUTTON1_DOWN_MASK) {
             x = me.getX();
             y = me.getY();
