@@ -85,6 +85,7 @@ public class DrawingBoard extends Frame implements MouseMotionListener {
         boxColor[2] = new Checkbox("파랑", group2, false);
 
         for(int i = 0; i < boxColor.length; i++){
+            boxColor[i].addItemListener(new EventHandler());
             p2.add(boxColor[i]);
         }
 
