@@ -38,8 +38,6 @@ public class DrawingBoard extends Frame implements MouseMotionListener {
     }
 
     public void panelInFrame() {
-//        sp = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
-
         // checkbox 생성
         p = new Panel();
         p.setLayout(new BorderLayout(10, 10));
