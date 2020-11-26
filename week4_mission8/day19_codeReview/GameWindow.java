@@ -9,10 +9,24 @@ import java.io.IOException;
 public class GameWindow extends JFrame {
 
     private BufferedImage background;
+    private Forky forky;
 
     public GameWindow() {       // 생성자 생성
-        lodeImage("/Users/kimnayeon/Downloads/pexels-miguel-á-padriñán-255379.jpg");
+        lodeImage("/Users/kimnayeon/codesquad-cocoa/week4_mission8/resources/pexels-miguel-á-padriñán-255379.jpg");
+        init();
+        initForky();
+    }
 
+    private void initForky() {
+        forky = new Forky();
+    }
+
+    private void init() {
+        setTitle("Cute Character");
+        setSize(background.getWidth(), background.getHeight());
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
+        setLocationRelativeTo(null);
     }
 
     private void lodeImage(String path) {
