@@ -10,13 +10,29 @@ public class Card {
     private final int oneDeckNum = cardNum.length * shape.length;
     private String[] card = new String[oneDeckNum];
     public String[] sixDeckCard;
+    public int[] value;
     private final String ANSI_RESET = "\u001B[0m";
     private final String ANSI_RED = "\u001B[31m";
 
     public Card(){
         getOneDeckCard();
         shuffleCard();
+//        getCardValue();
     }
+
+//    Todo: 카드 마다 value 값 주기 어떻게 하지..
+//    private void getCardValue() {
+//        value = new int[10];
+//        for(int i = 0; i < 10; i++){
+//            value[i] = i + 1;
+//        }
+//
+//        for(int j = 0; j < sixDeckCard.length; j++) {
+//            if(sixDeckCard[j].charAt(0) == 'a'){
+//
+//            }
+//        }
+//    }
 
     // 한덱의 카드 생성
     private String[] getOneDeckCard() {
