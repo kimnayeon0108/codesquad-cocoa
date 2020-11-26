@@ -112,8 +112,8 @@ public class DrawingBoard extends Frame implements MouseListener, MouseMotionLis
 
     @Override
     public void mousePressed(MouseEvent e) {
-        startX = e.getX();
-        startY = e.getY();
+        this.x = e.getX();
+        this.y = e.getY();
     }
 
     @Override
@@ -130,11 +130,9 @@ public class DrawingBoard extends Frame implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (e.getModifiersEx() == MouseEvent.BUTTON1_DOWN_MASK) {
+//        if (e.getModifiersEx() == MouseEvent.BUTTON1_DOWN_MASK) {
             if (shapeState.equals("straight")) {
                 gImg.drawLine(x, y, endX, endY);
-                x = e.getX();
-                y = e.getY();
                 // Todo: 이부분 연구해서 수정
 
                 repaint();
@@ -150,7 +148,7 @@ public class DrawingBoard extends Frame implements MouseListener, MouseMotionLis
             }
         }
 
-    }
+//    }
 
     @Override
     public void mouseMoved(MouseEvent e) {
