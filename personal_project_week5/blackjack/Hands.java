@@ -5,7 +5,8 @@ public class Hands {
     public int handsNum;
     public String firstCard;
     public String secondCard;
+    public int totalValue;
 
-    // Todo: initial two 카드의 합 담은 변수 생성하기
-//    public int totalTwoCard = Integer.valueOf(firstCard) + Integer.valueOf(secondCard) ;
+
+
 }
