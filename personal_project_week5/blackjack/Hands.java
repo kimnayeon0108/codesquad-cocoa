@@ -5,6 +5,8 @@ public class Hands {
     public int handsNum;
     public String firstCard;
     public String secondCard;
+    public int firstValue = 0;
+    public int secondValue = 0;
     public int totalValue;
-    public String nextCard;
+    public boolean pBlackjack = false;
 }

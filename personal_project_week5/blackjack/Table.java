@@ -1,6 +1,5 @@
 package blackjack;
 
-import javax.sound.midi.Soundbank;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -8,16 +7,18 @@ import java.util.Scanner;
 public class Table {
     private Scanner s = new Scanner(System.in);
     private int buyingChips;
-    private String getName;
     private int numOfHands;
     private final int MAX_HANDS = 3;
+
     private Player p;
     private House house;
     private Card c;
     private Dealer d = new Dealer();
     private Hands[] handsArr;
-    private boolean hit[];
-    private ArrayList<boolean[]> hitArrList;
+
+    private int oneMoreCard = 0;
+    private int over = 0;    // 핸드 별로 오버시 1씩 커짐
+
     private ArrayList<String> dividedCard;
 
     private DecimalFormat formatter = new DecimalFormat("###,###,###");
@@ -36,7 +37,7 @@ public class Table {
 
     private void initPlayer() {
         System.out.println("사용자의 이름을 입력해주세요.");
-        getName = s.next();
+        String getName = s.next();
         p = new Player(getName);
         System.out.println("사용자가 생성되었습니다. \n\t이름 :" + getName
                 + "\t현금 : " + formatter.format(p.money) + "\t칩스 잔액 : " + p.chips);
@@ -64,51 +65,106 @@ public class Table {
         getHands(numOfHands);   // 받은 hands 수 만큼 array 생성
         divideCards(numOfHands);
         chooseHitOrStay();
+        // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
+        if(this.over != numOfHands) dealerGetCard();
+    }
+
+    private void dealerGetCard() {
+        System.out.printf("\n======= 딜러 =======\n현재 딜러 카드: %s", d.firstCard);
+
+        boolean ace;        // ace 갖고 있는지 아닌지
+
+        String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
+        int valueOfNextCard = c.valueArr[dividedCard.size() + oneMoreCard];
+
+        if(d.value == 1|| valueOfNextCard == 1){
+            ace = true;
+        } else {
+            ace = false;
+        }
+
+        //Todo: 추가로 받는 카드가 a 일 경우 구현하기
+        for (int i = 0; d.value < 17; i++) {
+            System.out.printf("\n%s를 받았습니다.", nextCard);
+            oneMoreCard++;
+
+            // 딜러 blackjack 인 경우
+            if (d.value == 1 && valueOfNextCard == 10) {
+                d.dBlackjack = true;
+                System.out.println("딜러 blackjack ...");
+                return;
+            }
+
+            // 딜러 카드 중 ace가 있고, total value 가 7 이상이면 게임 종료
+            if (ace && d.value + valueOfNextCard >= 7) {
+                System.out.printf("\n딜러 카드의 total value: %d", d.value + valueOfNextCard + 10);
+                return;
+            }
+
+            // 딜러 카드 중 ace가 있고, total value 가 7 이하일 경우
+            if (ace && d.value + valueOfNextCard < 7) {
+                   System.out.printf("\n딜러 카드의 total value: %d or %d",
+                                        d.value + valueOfNextCard, d.value + valueOfNextCard + 10);
+                   d.value += valueOfNextCard;
+            }
+
+            // 딜러 카드 중 ace 가 없는 경우
+            if(!ace){
+                System.out.printf("\n딜러 카드의 total value: %d", d.value + valueOfNextCard);
+                d.value += valueOfNextCard;
+            }
+
+            // 딜러 21 이상 blackjack
+            if (d.value > 21) {
+                d.dBust = true;
+                System.out.println("딜러 bust!!! congratulations!!");
+            }
+
+        }
     }
 
     private void chooseHitOrStay() {
-        hitArrList = new ArrayList<boolean[]>();     // hand 별로 hit stay 담는 arraylist
-        hit = new boolean[handsArr.length];         // hand 별 hit stay 여부
 
-        for (int i = 0; i < handsArr.length; i++) {     // hand 수만큼 hit stay 묻기  
+        for (int i = 0; i < handsArr.length; i++) {     // hand 수만큼 hit stay 묻기
             askHisStay(i);
         }
     }
 
     private void askHisStay(int i) {
+        int hitOrStay;
+        boolean hit = false;
+
         System.out.println("\n=======" + handsArr[i].handsNum + "번 핸드 hit or stay (숫자를 입력하세요. 1번 : hit, 2번 : stay) =======");
-        int hitOrStay = s.nextInt();
-        if (hitOrStay == 1) {       // hit 일 경우
-            int a = 1;
-            int total = handsArr[i].totalValue + c.valueArr[dividedCard.size() + a];
-            System.out.printf("\n%s 카드를 받았습니다. total value: %d \n", c.sixDeckCard[dividedCard.size() + a], total);
-            if (total > 21){
-                System.out.printf("Over 21, %d번 핸드는 loosing 하였습니다.", handsArr[i].handsNum);
-            } else{
+        hitOrStay = s.nextInt();
+
+        if(hitOrStay == 1){
+            hit = true;
+        }
+        if(hitOrStay == 2){
+            hit = false;
+        }
+
+        // hit 일 경우
+        if (hit) {
+            oneMoreCard++;
+            handsArr[i].totalValue += c.valueArr[dividedCard.size() + oneMoreCard];
+            System.out.printf("\n%s 카드를 받았습니다. total value: %d",
+                    c.sixDeckCard[dividedCard.size() + oneMoreCard], handsArr[i].totalValue);
+
+            // Over 21 인 경우
+            if (handsArr[i].totalValue > 21) {
+                System.out.printf("\nOver 21, %d번 핸드는 loosing 하였습니다.\n", handsArr[i].handsNum);
+                over++;
+            } else {
                 askHisStay(i);
             }
-            a++;
         }
-        if (hitOrStay == 2) {       // stay 일 경우
+
+        // stay 일 경우
+        if (!hit) {
             System.out.println("stay");
         }
     }
-
-//    private void hitStay(int i, boolean[] hit) {
-//        if (hit[i] == true) {
-//            int total = handsArr[i].totalValue + c.valueArr[dividedCard.size() + (i + 1)];
-//            System.out.printf("\n%s 카드를 받았습니다. total value: %d \n", c.sixDeckCard[dividedCard.size() + (i + 1)], total);
-//            if (total > 21){
-//                System.out.printf("Over 21, %d번 핸드는 loosing 하였습니다.", handsArr[i].handsNum);
-//            } else{
-//                askHisStay(i);
-//            }
-//        }
-//        if (hit[i] == false){
-//            System.out.println("stay");
-//        }
-//    }
-
 
     private void divideCards(int numOfHands) {
         c = new Card();     // Card 객체 생성과 동시에, 카드 셔플 진행 완료
@@ -143,30 +199,48 @@ public class Table {
                 break;
         }
 
-        sumValue(numOfHands);       // 핸드별로 total value 얻기
+        handsValue(numOfHands);       // 핸드별로 total value 얻기
         printDividedCards();
-
     }
 
-    private void sumValue(int numOfHands) {
+    private void handsValue(int numOfHands) {
         if (numOfHands == 1) {
-            handsArr[0].totalValue = c.valueArr[0] + c.valueArr[2];
+            handsArr[0].firstValue = c.valueArr[0];
+            d.value = c.valueArr[1];
+            handsArr[0].secondValue = c.valueArr[2];
         }
         if (numOfHands == 2) {
-            handsArr[0].totalValue = c.valueArr[0] + c.valueArr[3];
-            handsArr[1].totalValue = c.valueArr[1] + c.valueArr[4];
+            handsArr[0].firstValue = c.valueArr[0];
+            handsArr[1].firstValue = c.valueArr[1];
+            d.value = c.valueArr[2];
+            handsArr[0].secondValue = c.valueArr[3];
+            handsArr[1].secondValue = c.valueArr[4];
         }
         if (numOfHands == 3) {
-            handsArr[0].totalValue = c.valueArr[0] + c.valueArr[4];
-            handsArr[1].totalValue = c.valueArr[1] + c.valueArr[5];
-            handsArr[2].totalValue = c.valueArr[2] + c.valueArr[6];
+            handsArr[0].firstValue = c.valueArr[0];
+            handsArr[1].firstValue = c.valueArr[1];
+            handsArr[2].firstValue = c.valueArr[2];
+            d.value = c.valueArr[3];
+            handsArr[0].secondValue = c.valueArr[4];
+            handsArr[1].secondValue = c.valueArr[5];
+            handsArr[2].secondValue = c.valueArr[6];
+        }
+        // hands 별 total value 구하기
+        for(int i = 0; i < handsArr.length; i++){
+            handsArr[i].totalValue = handsArr[i].firstValue + handsArr[i].secondValue;
         }
     }
 
     private void printDividedCards() {
         for (int i = 0; i < handsArr.length; i++) {
-            System.out.printf("Hand %d: %s, %s\t total value: %d \n", handsArr[i].handsNum,
-                    handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue);
+            // 카드가 ace 일 경우 value 1 or 11
+            if (handsArr[i].firstValue == 1 || handsArr[i].secondValue == 1) {
+                System.out.printf("Hand %d: %s, %s\t total value: %d or %d \n", handsArr[i].handsNum,
+                        handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue, handsArr[i].totalValue + 10);
+            } else {
+                System.out.printf("Hand %d: %s, %s\t total value: %d \n", handsArr[i].handsNum,
+                        handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue);
+            }
         }
         System.out.printf("딜러 카드: %s", d.firstCard);
     }
