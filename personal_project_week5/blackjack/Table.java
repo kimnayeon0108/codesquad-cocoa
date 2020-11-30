@@ -11,7 +11,6 @@ public class Table {
     private final int MAX_HANDS = 3;
 
     private Player p;
-    private House house;
     private Card c;
     private Dealer d = new Dealer();
     private Hands[] handsArr;
@@ -26,13 +25,8 @@ public class Table {
     public Table() {
 
         initPlayer();
-        initHouse();
         buyChips();
         startGame();
-    }
-
-    private void initHouse() {
-        house = new House();
     }
 
     private void initPlayer() {
@@ -40,7 +34,7 @@ public class Table {
         String getName = s.next();
         p = new Player(getName);
         System.out.println("사용자가 생성되었습니다. \n\t이름 :" + getName
-                + "\t현금 : " + formatter.format(p.money) + "\t칩스 잔액 : " + p.chips);
+                + "\t현금 : " + formatter.format(p.money) + "\t칩스 잔액 : " + p.pChips);
     }
 
     private void buyChips() {
@@ -52,21 +46,49 @@ public class Table {
             buyChips();
         }
         p.money = p.money - buyingChips;
-        p.chips = p.chips + buyingChips;
-        house.balance = house.balance - buyingChips;
+        p.pChips = p.pChips + buyingChips;
+        d.dChips = d.dChips - buyingChips;
+
+        // 만원짜리 칩스 갯수
 
         System.out.println("칩스 " + formatter.format(buyingChips) + "이 생성되었습니다.");
-        System.out.println("칩스 잔액 : " + formatter.format(p.chips));
+        System.out.println("칩스 잔액 : " + formatter.format(p.pChips));
+        System.out.println("딜러 보유 칩스 금액 : " + formatter.format(d.dChips));
     }
 
     private void startGame() {
         // 핸드 수 지정, 베팅 금액 설정
         chooseNumOfHands();
         getHands(numOfHands);   // 받은 hands 수 만큼 array 생성
+        betChips(handsArr);
+
         divideCards(numOfHands);
         chooseHitOrStay();
+
         // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
         if (this.over != numOfHands) dealerGetCard();
+    }
+
+    private void betChips(Hands[] handsArr) {
+        for(int i = 0; i < handsArr.length; i++){
+            System.out.printf("===== Hands %d 베팅할 1만원짜리 칩스 갯수를 입력하세요. =====",
+                                handsArr[i].handsNum);
+            handsArr[i].bAmount = s.nextInt();
+            if(handsArr[i].bAmount > 100000){
+                System.out.println("maximum 10만원까지 베팅 가능합니다.");
+            }
+        }
+    }
+
+    private Hands[] getHands(int numOfHands) {
+
+        // player 가 지정한 hands 수 만큼 hands 객체 생성해서 배열에 값 담기
+        handsArr = new Hands[numOfHands];
+        for (int i = 0; i < handsArr.length; i++) {
+            handsArr[i] = new Hands();
+            handsArr[i].handsNum = i + 1;
+        }
+        return handsArr;
     }
 
     private void dealerGetCard() {
@@ -119,7 +141,6 @@ public class Table {
                 d.dBust = true;
                 System.out.println("딜러 bust!!! congratulations!!");
             }
-
         }
     }
 
@@ -282,18 +303,8 @@ public class Table {
         System.out.printf("딜러 카드: %s", d.firstCard);
     }
 
-    private Hands[] getHands(int numOfHands) {
-        // player 가 지정한 hands 수 만큼 hands 객체 생성해서 배열에 값 담기
-        handsArr = new Hands[numOfHands];
-        for (int i = 0; i < handsArr.length; i++) {
-            handsArr[i] = new Hands();
-            handsArr[i].handsNum = i + 1;
-        }
-        return handsArr;
-    }
-
     private int chooseNumOfHands() {
-        System.out.println("플레이하고 싶은 Hand 수를 입력하세요. (1-3)");
+        System.out.println("\n플레이하고 싶은 Hand 수를 입력하세요. (1-3)");
         this.numOfHands = s.nextInt();
         if (numOfHands > MAX_HANDS || numOfHands < 1) {
             System.out.println("Three Hands 까지만 베팅이 가능합니다.\n다시 입력해 주세요.");
