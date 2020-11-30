@@ -16,7 +16,7 @@ public class Table {
     private Dealer d = new Dealer();
     private Hands[] handsArr;
 
-    private int oneMoreCard = 0;
+    private int oneMoreCard = 0;        // 카드 한장씩 받을때마다 1씩 증가
     private int over = 0;    // 핸드 별로 오버시 1씩 커짐
 
     private ArrayList<String> dividedCard;
@@ -66,50 +66,50 @@ public class Table {
         divideCards(numOfHands);
         chooseHitOrStay();
         // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
-        if(this.over != numOfHands) dealerGetCard();
+        if (this.over != numOfHands) dealerGetCard();
     }
 
     private void dealerGetCard() {
         System.out.printf("\n======= 딜러 =======\n현재 딜러 카드: %s", d.firstCard);
 
-        boolean ace;        // ace 갖고 있는지 아닌지
-
-        String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
-        int valueOfNextCard = c.valueArr[dividedCard.size() + oneMoreCard];
-
-        if(d.value == 1|| valueOfNextCard == 1){
-            ace = true;
-        } else {
-            ace = false;
-        }
-
-        //Todo: 추가로 받는 카드가 a 일 경우 구현하기
         for (int i = 0; d.value < 17; i++) {
-            System.out.printf("\n%s를 받았습니다.", nextCard);
             oneMoreCard++;
 
+            String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
+            int valueOfNextCard = c.valueArr[dividedCard.size() + oneMoreCard];
+
+            if (d.firstValue == 1 || valueOfNextCard == 1) {
+                d.dAce = true;
+            } else {
+                d.dAce = false;
+            }
+
+            System.out.printf("\n%s를 받았습니다.", nextCard);
+
             // 딜러 blackjack 인 경우
-            if (d.value == 1 && valueOfNextCard == 10) {
+            if ((d.value == 1 && valueOfNextCard == 10) || (d.value == 10 && valueOfNextCard == 1)) {
                 d.dBlackjack = true;
                 System.out.println("딜러 blackjack ...");
                 return;
             }
 
             // 딜러 카드 중 ace가 있고, total value 가 7 이상이면 게임 종료
-            if (ace && d.value + valueOfNextCard >= 7) {
+            if (d.dAce && d.value + valueOfNextCard >= 7) {
+
                 System.out.printf("\n딜러 카드의 total value: %d", d.value + valueOfNextCard + 10);
+                d.value = d.value + valueOfNextCard + 10;
                 return;
             }
 
             // 딜러 카드 중 ace가 있고, total value 가 7 이하일 경우
-            if (ace && d.value + valueOfNextCard < 7) {
-                   System.out.printf("\n딜러 카드의 total value: %d or %d",
-                                        d.value + valueOfNextCard, d.value + valueOfNextCard + 10);
-                   d.value += valueOfNextCard;
+            if (d.dAce && d.value + valueOfNextCard < 7) {
+                System.out.printf("\n딜러 카드의 total value: %d or %d",
+                        d.value + valueOfNextCard, d.value + valueOfNextCard + 10);
+                d.value += valueOfNextCard;
             }
 
             // 딜러 카드 중 ace 가 없는 경우
-            if(!ace){
+            if (!d.dAce) {
                 System.out.printf("\n딜러 카드의 total value: %d", d.value + valueOfNextCard);
                 d.value += valueOfNextCard;
             }
@@ -126,7 +126,7 @@ public class Table {
     private void chooseHitOrStay() {
 
         for (int i = 0; i < handsArr.length; i++) {     // hand 수만큼 hit stay 묻기
-            askHisStay(i);
+            if(!handsArr[i].pBlackjack) askHisStay(i);
         }
     }
 
@@ -137,10 +137,10 @@ public class Table {
         System.out.println("\n=======" + handsArr[i].handsNum + "번 핸드 hit or stay (숫자를 입력하세요. 1번 : hit, 2번 : stay) =======");
         hitOrStay = s.nextInt();
 
-        if(hitOrStay == 1){
+        if (hitOrStay == 1) {
             hit = true;
         }
-        if(hitOrStay == 2){
+        if (hitOrStay == 2) {
             hit = false;
         }
 
@@ -148,8 +148,17 @@ public class Table {
         if (hit) {
             oneMoreCard++;
             handsArr[i].totalValue += c.valueArr[dividedCard.size() + oneMoreCard];
-            System.out.printf("\n%s 카드를 받았습니다. total value: %d",
-                    c.sixDeckCard[dividedCard.size() + oneMoreCard], handsArr[i].totalValue);
+
+            // 핸드별로 받은 카드 중 ace 있고, 10 이하인 경우
+            if ((c.valueArr[dividedCard.size() + oneMoreCard] == 1 || handsArr[i].pAce) && handsArr[i].totalValue < 10) {
+                handsArr[i].pAce = true;
+
+                System.out.printf("\n%s 카드를 받았습니다. total value: %d or %d",
+                        c.sixDeckCard[dividedCard.size() + oneMoreCard], handsArr[i].totalValue, handsArr[i].totalValue + 10);
+            } else {
+                System.out.printf("\n%s 카드를 받았습니다. total value: %d",
+                        c.sixDeckCard[dividedCard.size() + oneMoreCard], handsArr[i].totalValue);
+            }
 
             // Over 21 인 경우
             if (handsArr[i].totalValue > 21) {
@@ -163,6 +172,12 @@ public class Table {
         // stay 일 경우
         if (!hit) {
             System.out.println("stay");
+
+            // ace 포함되어있고, 더한값이 10 이하인 경우
+            if (handsArr[i].pAce && handsArr[i].totalValue < 10) {
+
+                handsArr[i].totalValue += 10;
+            }
         }
     }
 
@@ -226,18 +241,40 @@ public class Table {
             handsArr[2].secondValue = c.valueArr[6];
         }
         // hands 별 total value 구하기
-        for(int i = 0; i < handsArr.length; i++){
+        for (int i = 0; i < handsArr.length; i++) {
             handsArr[i].totalValue = handsArr[i].firstValue + handsArr[i].secondValue;
         }
     }
 
     private void printDividedCards() {
+
         for (int i = 0; i < handsArr.length; i++) {
-            // 카드가 ace 일 경우 value 1 or 11
+
+            // ace 카드 유무 여부
             if (handsArr[i].firstValue == 1 || handsArr[i].secondValue == 1) {
+                handsArr[i].pAce = true;
+            } else {
+                handsArr[i].pAce = false;
+            }
+
+            // 해당 핸드 블랙잭인 경우
+            if ((handsArr[i].firstValue == 10 || handsArr[i].secondValue == 10) && handsArr[i].pAce) {
+                handsArr[i].pBlackjack = true;
+
+                System.out.printf("Hand %d: %s, %s\t total value: blackjack!!! congrat!!! \n", handsArr[i].handsNum,
+                        handsArr[i].firstCard, handsArr[i].secondCard );
+            }
+
+            // 블랙잭 아니고, 해당 핸드 ace 있을 경우
+            if ((handsArr[i].firstValue != 10 && handsArr[i].secondValue != 10) && handsArr[i].pAce) {
+
                 System.out.printf("Hand %d: %s, %s\t total value: %d or %d \n", handsArr[i].handsNum,
                         handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue, handsArr[i].totalValue + 10);
-            } else {
+            }
+
+            // 블랙잭 아니고, ace도 없는 경우
+            if(!handsArr[i].pBlackjack && !handsArr[i].pAce){
+
                 System.out.printf("Hand %d: %s, %s\t total value: %d \n", handsArr[i].handsNum,
                         handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue);
             }

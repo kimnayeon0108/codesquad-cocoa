@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class Card {
+
     private String[] cardNum = {"a", "2", "3", "4", "5", "6", "7",
-            "8", "9", "10", "J", "Q", "K"};
+                                "8", "9", "10", "J", "Q", "K"};
     private String[] shape = {"♥", "♠", "♦", "♣"};
     private final int oneDeckNum = cardNum.length * shape.length;
     private String[] card = new String[oneDeckNum];
-    public String[] sixDeckCard = new String[oneDeckNum * 6];
-    public int[] valueArr = new int[sixDeckCard.length];
 
+    public String[] sixDeckCard = new String[oneDeckNum * 6];
+    public int[] valueArr = new int[sixDeckCard.length];        // 카드 값에 따른 value 배열 생성
 
     public final String ANSI_RESET = "\u001B[0m";
     public final String ANSI_RED = "\u001B[31m";
@@ -128,11 +129,5 @@ public class Card {
         return valueArr;
     }
 
-//    public static void main(String[] args) {
-//        Card c = new Card();
-//        for(int i = 0; i < sixDeckCard.length; i++){
-//            System.out.println(sixDeckCard[i]);
-//        }
-//    }
 }
 

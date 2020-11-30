@@ -5,8 +5,11 @@ public class Hands {
     public int handsNum;
     public String firstCard;
     public String secondCard;
+
     public int firstValue = 0;
     public int secondValue = 0;
     public int totalValue;
+
     public boolean pBlackjack = false;
+    public boolean pAce = false;        // 핸드별로 ace 유무 여부
 }
