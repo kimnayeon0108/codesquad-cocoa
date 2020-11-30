@@ -12,6 +12,7 @@ public class Hands {
     public int secondValue = 0;
     public int totalValue;
 
+    public boolean pOver = false;
     public boolean pBlackjack = false;
     public boolean pAce = false;        // 핸드별로 ace 유무 여부
 }
