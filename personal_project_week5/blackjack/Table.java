@@ -49,8 +49,6 @@ public class Table {
         p.pChips = p.pChips + buyingChips;
         d.dChips = d.dChips - buyingChips;
 
-        // 만원짜리 칩스 갯수
-
         System.out.println("칩스 " + formatter.format(buyingChips) + "이 생성되었습니다.");
         System.out.println("칩스 잔액 : " + formatter.format(p.pChips));
         System.out.println("딜러 보유 칩스 금액 : " + formatter.format(d.dChips));
@@ -60,7 +58,9 @@ public class Table {
         // 핸드 수 지정, 베팅 금액 설정
         chooseNumOfHands();
         getHands(numOfHands);   // 받은 hands 수 만큼 array 생성
-        betChips(handsArr);
+        for (int w = 0; w < handsArr.length; w++) {
+            betChips(w);
+        }
 
         divideCards(numOfHands);
         chooseHitOrStay();
@@ -69,15 +69,57 @@ public class Table {
         if (this.over != numOfHands) dealerGetCard();
     }
 
-    private void betChips(Hands[] handsArr) {
-        for(int i = 0; i < handsArr.length; i++){
-            System.out.printf("===== Hands %d 베팅할 1만원짜리 칩스 갯수를 입력하세요. =====",
-                                handsArr[i].handsNum);
-            handsArr[i].bAmount = s.nextInt();
-            if(handsArr[i].bAmount > 100000){
-                System.out.println("maximum 10만원까지 베팅 가능합니다.");
+    private int chooseNumOfHands() {
+        System.out.println("\n플레이하고 싶은 Hand 수를 입력하세요. (1-3)");
+        this.numOfHands = s.nextInt();
+
+        // Three hands 이상 선택시
+        if (numOfHands > MAX_HANDS || numOfHands < 1) {
+            System.out.println("Three Hands 까지만 베팅이 가능합니다.\n다시 입력해 주세요.");
+            chooseNumOfHands();
+        }
+
+        // 보유 칩스 금액이 선택한 hands 수보다 적을 시
+        if (p.pChips < numOfHands * 10000) {
+            System.out.println("칩스 보유량이 부족합니다.\n칩스를 구매하고 싶으면 1, " +
+                    "Hands 수를 다시 입력하려면 2를 입력하세요.");
+            int input = s.nextInt();
+            if (input == 1) {
+                buyChips();
+                chooseNumOfHands();
+            }
+            if (input == 2) {
+                chooseNumOfHands();
             }
         }
+        return numOfHands;
+    }
+
+    private void betChips(int w) {
+        System.out.printf("===== Hands %d 베팅할 금액을 입력하세요. =====\n", handsArr[w].handsNum);
+        handsArr[w].bAmount = s.nextInt();
+
+        if (handsArr[w].bAmount % 10000 != 0) {
+            System.out.println("만원 단위로 베팅이 가능합니다. 다시 입력해주세요.");
+            betChips(w);
+        }
+        if (handsArr[w].bAmount > 100000) {
+            System.out.println("maximum 10만원까지 베팅 가능합니다. 다시 입력해주세요.");
+            betChips(w);
+        }
+        if (handsArr[w].bAmount > p.pChips) {
+            System.out.println("보유 칩스량이 부족합니다. \n칩스를 구매하고 싶으면 1," +
+                    "베팅금액을 다시 입력하려면 2를 입력하세요.");
+            int input2 = s.nextInt();
+            if (input2 == 1) {
+                buyChips();
+                betChips(w);
+            }
+            if (input2 == 2) {
+                betChips(w);
+            }
+        }
+        p.pChips = p.pChips - handsArr[w].bAmount;
     }
 
     private Hands[] getHands(int numOfHands) {
@@ -147,7 +189,7 @@ public class Table {
     private void chooseHitOrStay() {
 
         for (int i = 0; i < handsArr.length; i++) {     // hand 수만큼 hit stay 묻기
-            if(!handsArr[i].pBlackjack) askHisStay(i);
+            if (!handsArr[i].pBlackjack) askHisStay(i);
         }
     }
 
@@ -283,7 +325,7 @@ public class Table {
                 handsArr[i].pBlackjack = true;
 
                 System.out.printf("Hand %d: %s, %s\t total value: blackjack!!! congrat!!! \n", handsArr[i].handsNum,
-                        handsArr[i].firstCard, handsArr[i].secondCard );
+                        handsArr[i].firstCard, handsArr[i].secondCard);
             }
 
             // 블랙잭 아니고, 해당 핸드 ace 있을 경우
@@ -294,23 +336,13 @@ public class Table {
             }
 
             // 블랙잭 아니고, ace도 없는 경우
-            if(!handsArr[i].pBlackjack && !handsArr[i].pAce){
+            if (!handsArr[i].pBlackjack && !handsArr[i].pAce) {
 
                 System.out.printf("Hand %d: %s, %s\t total value: %d \n", handsArr[i].handsNum,
                         handsArr[i].firstCard, handsArr[i].secondCard, handsArr[i].totalValue);
             }
         }
         System.out.printf("딜러 카드: %s", d.firstCard);
-    }
-
-    private int chooseNumOfHands() {
-        System.out.println("\n플레이하고 싶은 Hand 수를 입력하세요. (1-3)");
-        this.numOfHands = s.nextInt();
-        if (numOfHands > MAX_HANDS || numOfHands < 1) {
-            System.out.println("Three Hands 까지만 베팅이 가능합니다.\n다시 입력해 주세요.");
-            chooseNumOfHands();
-        }
-        return numOfHands;
     }
 
     public static void main(String[] args) {
