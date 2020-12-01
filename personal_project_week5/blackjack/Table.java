@@ -17,6 +17,7 @@ public class Table implements Runnable {
 
     private int oneMoreCard = 0;        // 카드 한장씩 받을때마다 1씩 증가
     private int over = 0;    // 핸드 별로 오버시 1씩 커짐
+    private boolean end = false;
 
     private ArrayList<String> dividedCard;
 
@@ -38,19 +39,23 @@ public class Table implements Runnable {
 
     private void buyChips() {
 
+        System.out.println();
         System.out.println("구매를 원하는 칩스의 금액을 입력해주세요.");
         buyingChips = s.nextInt();
         if (buyingChips % 10000 != 0) {
             System.out.println("만원 단위로만 구매가 가능합니다.");
             buyChips();
-        }
-        p.money = p.money - buyingChips;
-        p.pChips = p.pChips + buyingChips;
-        d.dChips = d.dChips - buyingChips;
+        } else {
+            p.money = p.money - buyingChips;
+            p.pChips = p.pChips + buyingChips;
+            d.dChips = d.dChips - buyingChips;
 
-        System.out.println("칩스 " + formatter.format(buyingChips) + "이 생성되었습니다.");
-        System.out.println("칩스 잔액 : " + formatter.format(p.pChips));
-        System.out.println("딜러 보유 칩스 금액 : " + formatter.format(d.dChips));
+            System.out.println("칩스 " + formatter.format(buyingChips) + "이 생성되었습니다.");
+            System.out.println("칩스 잔액 : " + formatter.format(p.pChips));
+            System.out.println("딜러 보유 칩스 금액 : " + formatter.format(d.dChips));
+        }
+
+
     }
 
     private void startGame() {
@@ -103,30 +108,42 @@ public class Table implements Runnable {
     }
 
     private void betChips(int w) {
-        System.out.printf("===== Hands %d 베팅할 금액을 입력하세요. =====\n", handsArr[w].handsNum);
-        handsArr[w].bAmount = s.nextInt();
 
-        if (handsArr[w].bAmount % 10000 != 0) {
-            System.out.println("만원 단위로 베팅이 가능합니다. 다시 입력해주세요.");
-            betChips(w);
-        }
-        if (handsArr[w].bAmount > 100000) {
-            System.out.println("maximum 10만원까지 베팅 가능합니다. 다시 입력해주세요.");
-            betChips(w);
-        }
-        if (handsArr[w].bAmount > p.pChips) {
-            System.out.println("보유 칩스량이 부족합니다. \n칩스를 구매하고 싶으면 1," +
-                    "베팅금액을 다시 입력하려면 2를 입력하세요.");
-            int input2 = s.nextInt();
-            if (input2 == 1) {
-                buyChips();
-                betChips(w);
+        boolean okay = true;
+
+        while(okay) {
+            System.out.printf("===== Hands %d 베팅할 금액을 입력하세요. =====\n", handsArr[w].handsNum);
+            handsArr[w].bAmount = s.nextInt();
+
+            // 만원 단위로 입력하지 않은 경우
+            if (handsArr[w].bAmount % 10000 != 0) {
+                System.out.println("만원 단위로 베팅이 가능합니다. 다시 입력해주세요.");
+                continue;
             }
-            if (input2 == 2) {
-                betChips(w);
+
+            // 맥시멈 금액 넘은 경우
+            if (handsArr[w].bAmount > 100000) {
+                System.out.println("maximum 10만원까지 베팅 가능합니다. 다시 입력해주세요.");
+                continue;
+            }
+
+            // 보유 칩스량이 부족한 경우
+            if (handsArr[w].bAmount > p.pChips) {
+                System.out.println("보유 칩스량이 부족합니다. \n칩스를 구매하고 싶으면 1," +
+                        "베팅금액을 다시 입력하려면 2를 입력하세요.");
+                int input2 = s.nextInt();
+                if (input2 == 1) {
+                    buyChips();
+                    betChips(w);
+                }
+                if (input2 == 2) {
+                    continue;
+                }
+            } else {
+                p.pChips = p.pChips - handsArr[w].bAmount;
+                okay = false;
             }
         }
-        p.pChips = p.pChips - handsArr[w].bAmount;
     }
 
     private void divideCards(int numOfHands) {
@@ -169,13 +186,13 @@ public class Table implements Runnable {
     private void handsValue(int numOfHands) {
         if (numOfHands == 1) {
             handsArr[0].firstValue = c.valueArr[0];
-            d.value = c.valueArr[1];
+            d.firstValue = c.valueArr[1];
             handsArr[0].secondValue = c.valueArr[2];
         }
         if (numOfHands == 2) {
             handsArr[0].firstValue = c.valueArr[0];
             handsArr[1].firstValue = c.valueArr[1];
-            d.value = c.valueArr[2];
+            d.firstValue = c.valueArr[2];
             handsArr[0].secondValue = c.valueArr[3];
             handsArr[1].secondValue = c.valueArr[4];
         }
@@ -183,7 +200,7 @@ public class Table implements Runnable {
             handsArr[0].firstValue = c.valueArr[0];
             handsArr[1].firstValue = c.valueArr[1];
             handsArr[2].firstValue = c.valueArr[2];
-            d.value = c.valueArr[3];
+            d.firstValue = c.valueArr[3];
             handsArr[0].secondValue = c.valueArr[4];
             handsArr[1].secondValue = c.valueArr[5];
             handsArr[2].secondValue = c.valueArr[6];
@@ -202,6 +219,8 @@ public class Table implements Runnable {
     private void printDividedCards() {
 
         for (int i = 0; i < handsArr.length; i++) {
+
+            System.out.println();
 
             // ace 카드 유무 여부
             if (handsArr[i].firstValue == 1 || handsArr[i].secondValue == 1) {
@@ -299,14 +318,14 @@ public class Table implements Runnable {
         }
     }
 
-    private void dealerGetCard() {
+    private synchronized void dealerGetCard(int firstValue) {
 
         oneMoreCard++;
 
         String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
         int nextCardValue = c.valueArr[dividedCard.size() + oneMoreCard];
 
-        if (d.value == 1 || nextCardValue == 1) {
+        if (d.firstValue == 1 || nextCardValue == 1) {
             d.dAce = true;
         } else {
             d.dAce = false;
@@ -317,6 +336,7 @@ public class Table implements Runnable {
         // 딜러 블랙잭
         if ((d.firstValue == 1 && nextCardValue == 10) || (d.firstValue == 10 && nextCardValue == 1)) {
             d.dBlackjack = true;
+            end = true;
             System.out.println("딜러 blackjack...");
             return;
         }
@@ -325,33 +345,55 @@ public class Table implements Runnable {
         if ((d.firstValue == 1 && nextCardValue > 5) && nextCardValue != 10) {
             System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue + 10);
             d.value = d.value + nextCardValue + 10;
+
+            d.dBlackjack = false;
+            end = true;
+            return;
         }
 
-        // 딜러 카드 중 ace 가 있고, nextValue 6 미만이고, total 이 10 이하일 경우
-        if ((d.dAce && nextCardValue < 6) && d.value + nextCardValue <= 10) {
+        // 딜러 카드 중 ace 가 있고, nextValue 6 미만이고, total 이 12 미만일 경우
+        if ((d.dAce && nextCardValue < 6) && d.value + nextCardValue < 12) {
             System.out.printf("\n딜러 카드의 total value: %d or %d",
                     d.value + nextCardValue, d.value + nextCardValue + 10);
             d.value += nextCardValue;
+
+            d.dBlackjack = false;
+            end = false;
         }
 
         // 딜러 카드 중 ace 가 있고, nextValue 6 이상이고, total 이 10 초과일 경우
 
-        // 딜러 카드 중 ace 가 있고, total 이 10 초과인 경우
-        if (d.dAce && d.value + nextCardValue > 10) {
+        // 딜러 카드 중 ace 가 있고, total 이 11 초과인 경우 (블랙잭 아닌경우)
+        if (d.dAce && d.value + nextCardValue > 11) {
             System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue);
             d.value += nextCardValue;
+
+            d.dBlackjack = false;
+            end = false;
         }
 
         // 딜러 카드 중 ace 가 없는 경우
         if (!d.dAce) {
             System.out.printf("\n딜러 카드의 total value: %d\n", d.value + nextCardValue);
             d.value += nextCardValue;
+
+            d.dBlackjack = false;
+            end = false;
         }
 
         // 딜러 21 이상 bust
         if (d.value > 21) {
+
+            d.dBlackjack = false;
             d.dBust = true;
+            end = true;
             System.out.println("딜러 bust!!! congratulations!!");
+        }
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
@@ -376,7 +418,7 @@ public class Table implements Runnable {
     }
 
     private void push(int z) {
-        System.out.printf("\n%d 번 핸드 push", handsArr[z].handsNum);
+        System.out.println(handsArr[z].handsNum + "번 핸드 push");
 
         p.pChips += handsArr[z].bAmount;
         handsArr[z].bAmount = 0;
@@ -393,7 +435,7 @@ public class Table implements Runnable {
         handsArr[z].bAmount = 0;
     }
 
-    private void payTake(int z) {
+    private synchronized void payTake(int z) {
 
         // 딜러 블랙잭, 손님 not 블랙잭
         if (d.dBlackjack && !handsArr[z].pBlackjack) {
@@ -420,7 +462,7 @@ public class Table implements Runnable {
         }
 
         // 딜러 value 가 손님 value 보다 클때
-        if (d.value > handsArr[z].totalValue || !d.dBust) {
+        if (d.value > handsArr[z].totalValue) {
             loose(z);
             return;
         }
@@ -432,10 +474,10 @@ public class Table implements Runnable {
         }
     }
 
-    public void finalizeGame() {
+    public synchronized void finalizeGame() {
         System.out.println("===========================");
-        System.out.println("칩스 잔액 : " +formatter.format(p.pChips) +"\t딜러 잔액 : "
-                            + formatter.format(d.dChips));
+        System.out.println("칩스 잔액 : " + formatter.format(p.pChips) + "\t딜러 잔액 : "
+                + formatter.format(d.dChips));
     }
 
     public static void main(String[] args) {
@@ -450,7 +492,7 @@ public class Table implements Runnable {
     public void run() {
 
         System.out.println("===== No more bet!!! Game start =====");
-
+        System.out.println("딜러 카드 뽑는 중 .....");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -463,29 +505,25 @@ public class Table implements Runnable {
         // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
         if (this.over != numOfHands) {
             System.out.printf("\n======= 딜러 =======\n현재 딜러 카드: %s", d.firstCard);
+            d.value = d.firstValue;
 
             for (int i = 0; d.value < 17; i++) {
-                dealerGetCard();
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                if (d.dBlackjack) return;     // 딜러 더이상 카드 안 받음
+                dealerGetCard(d.firstValue);
 
+                if (end) return;     // 딜러 더이상 카드 안 받음
+                if (!d.dBust) d.dBust = false;
             }
         }
 
         for (int z = 0; z < handsArr.length; z++) {
 
             if (!handsArr[z].pOver) {
-
                 System.out.println();
                 payTake(z);
 
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
