@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Table {
+public class Table implements Runnable {
     private Scanner s = new Scanner(System.in);
     private int buyingChips;
     private int numOfHands;
@@ -26,7 +26,6 @@ public class Table {
 
         initPlayer();
         buyChips();
-        startGame();
     }
 
     private void initPlayer() {
@@ -61,23 +60,9 @@ public class Table {
         getHands(numOfHands);   // 받은 hands 수 만큼 array 생성
 
         for (int w = 0; w < handsArr.length; w++) {
+
             betChips(w);
         }
-
-        divideCards(numOfHands);
-        chooseHitOrStay();
-
-        // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
-        if (this.over != numOfHands) dealerGetCard();
-
-        for (int z = 0; z < handsArr.length; z++) {
-
-            if (!handsArr[z].pOver) {
-                payTake(z);
-            }
-        }
-        System.out.println("===========================");
-        System.out.printf("칩스 잔액 : %d, 딜러 잔액 : %d\n", p.pChips, d.dChips);
     }
 
     private int chooseNumOfHands() {
@@ -206,6 +191,11 @@ public class Table {
         // hands 별 total value 구하기
         for (int i = 0; i < handsArr.length; i++) {
             handsArr[i].totalValue = handsArr[i].firstValue + handsArr[i].secondValue;
+
+            // hands 에 ace 있으면 pAce = true
+            if (handsArr[i].firstValue == 1 || handsArr[i].secondValue == 1) {
+                handsArr[i].pAce = true;
+            }
         }
     }
 
@@ -256,7 +246,8 @@ public class Table {
         int hitOrStay;
         boolean hit = false;
 
-        System.out.println("\n=======" + handsArr[i].handsNum + "번 핸드 hit or stay (숫자를 입력하세요. 1번 : hit, 2번 : stay) =======");
+        System.out.println("\n=======" + handsArr[i].handsNum + "번 핸드 value: " + handsArr[i].totalValue +
+                "\thit or stay (숫자를 입력하세요. 1번 : hit, 2번 : stay) =======");
         hitOrStay = s.nextInt();
 
         if (hitOrStay == 1) {
@@ -309,64 +300,60 @@ public class Table {
     }
 
     private void dealerGetCard() {
-        System.out.printf("\n======= 딜러 =======\n현재 딜러 카드: %s", d.firstCard);
 
-        for (int i = 0; d.value < 17; i++) {
-            oneMoreCard++;
+        oneMoreCard++;
 
-            String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
-            int nextCardValue = c.valueArr[dividedCard.size() + oneMoreCard];
+        String nextCard = c.sixDeckCard[dividedCard.size() + oneMoreCard];
+        int nextCardValue = c.valueArr[dividedCard.size() + oneMoreCard];
 
-            if(d.value == 1 || nextCardValue == 1){
-                d.dAce = true;
-            } else {
-                d.dAce = false;
-            }
-
-            System.out.printf("\n%s를 받았습니다.", nextCard);
-
-            // 딜러 블랙잭
-            if ((d.firstValue == 1 && nextCardValue == 10) || (d.firstValue == 10 && nextCardValue == 1)) {
-                d.dBlackjack = true;
-                System.out.println("딜러 blackjack...");
-                return;     // 딜러 더이상 카드 안 받음
-            }
-
-            // 딜러 firstCard ace 이고, nextValue 6 이상일 경우
-            if (d.firstValue == 1 && nextCardValue > 5) {
-                System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue + 10);
-                d.value = d.value + nextCardValue + 10;
-                return;
-            }
-
-            // 딜러 카드 중 ace 가 있고, nextValue 6 미만이고, total 이 10 이하일 경우
-            if ((d.dAce && nextCardValue < 6) && d.value + nextCardValue <= 10){
-                System.out.printf("\n딜러 카드의 total value: %d or %d",
-                        d.value + nextCardValue, d.value + nextCardValue + 10);
-                d.value += nextCardValue;
-                continue;
-            }
-
-            // 딜러 카드 중 ace 가 있고, nextValue 6 이상이고, total 이 10 초과일 경우
-
-            // 딜러 카드 중 ace 가 있고, total 이 10 초인 경우
-            if(d.dAce && d.value + nextCardValue > 10){
-                System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue);
-                d.value += nextCardValue;
-            }
-
-            // 딜러 카드 중 ace 가 없는 경우
-            if (!d.dAce) {
-                System.out.printf("\n딜러 카드의 total value: %d\n", d.value + nextCardValue);
-                d.value += nextCardValue;
-            }
-
-            // 딜러 21 이상 bust
-            if (d.value > 21) {
-                d.dBust = true;
-                System.out.println("딜러 bust!!! congratulations!!");
-            }
+        if (d.value == 1 || nextCardValue == 1) {
+            d.dAce = true;
+        } else {
+            d.dAce = false;
         }
+
+        System.out.printf("\n%s를 받았습니다.", nextCard);
+
+        // 딜러 블랙잭
+        if ((d.firstValue == 1 && nextCardValue == 10) || (d.firstValue == 10 && nextCardValue == 1)) {
+            d.dBlackjack = true;
+            System.out.println("딜러 blackjack...");
+            return;
+        }
+
+        // 딜러 firstCard ace 이고, nextValue 6 이상일 경우 (블랙잭 아닌경우)
+        if ((d.firstValue == 1 && nextCardValue > 5) && nextCardValue != 10) {
+            System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue + 10);
+            d.value = d.value + nextCardValue + 10;
+        }
+
+        // 딜러 카드 중 ace 가 있고, nextValue 6 미만이고, total 이 10 이하일 경우
+        if ((d.dAce && nextCardValue < 6) && d.value + nextCardValue <= 10) {
+            System.out.printf("\n딜러 카드의 total value: %d or %d",
+                    d.value + nextCardValue, d.value + nextCardValue + 10);
+            d.value += nextCardValue;
+        }
+
+        // 딜러 카드 중 ace 가 있고, nextValue 6 이상이고, total 이 10 초과일 경우
+
+        // 딜러 카드 중 ace 가 있고, total 이 10 초과인 경우
+        if (d.dAce && d.value + nextCardValue > 10) {
+            System.out.printf("\n딜러 카드의 total value: %d", d.value + nextCardValue);
+            d.value += nextCardValue;
+        }
+
+        // 딜러 카드 중 ace 가 없는 경우
+        if (!d.dAce) {
+            System.out.printf("\n딜러 카드의 total value: %d\n", d.value + nextCardValue);
+            d.value += nextCardValue;
+        }
+
+        // 딜러 21 이상 bust
+        if (d.value > 21) {
+            d.dBust = true;
+            System.out.println("딜러 bust!!! congratulations!!");
+        }
+
     }
 
     private void win(int z) {
@@ -411,35 +398,103 @@ public class Table {
         // 딜러 블랙잭, 손님 not 블랙잭
         if (d.dBlackjack && !handsArr[z].pBlackjack) {
             loose(z);
+            return;
         }
 
         // 손님만 블랙잭
         if (!d.dBlackjack && handsArr[z].pBlackjack) {
             winBJ(z);
+            return;
         }
 
         // 딜러 value 가 손님 value 와 같을 때, 딜러 손님 둘 다 블랙잭 일때
         if ((d.dBlackjack && handsArr[z].pBlackjack) || (d.value == handsArr[z].totalValue)) {
             push(z);
-        }
-
-        // 딜러 value 가 손님 value 보다 클때
-        if (d.value > handsArr[z].totalValue || !d.dBust) {
-            loose(z);
+            return;
         }
 
         // 딜러 bust 일 때
         if (d.dBust) {
             win(z);
+            return;
+        }
+
+        // 딜러 value 가 손님 value 보다 클때
+        if (d.value > handsArr[z].totalValue || !d.dBust) {
+            loose(z);
+            return;
         }
 
         // 딜러 value 가 손님 value 보다 작을 때
         if (d.value < handsArr[z].totalValue) {
             win(z);
+            return;
         }
+    }
+
+    public void finalizeGame() {
+        System.out.println("===========================");
+        System.out.println("칩스 잔액 : " +formatter.format(p.pChips) +"\t딜러 잔액 : "
+                            + formatter.format(d.dChips));
     }
 
     public static void main(String[] args) {
         Table t = new Table();
+        Thread thread = new Thread(t);
+
+        t.startGame();
+        thread.start();
     }
+
+    @Override
+    public void run() {
+
+        System.out.println("===== No more bet!!! Game start =====");
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        divideCards(numOfHands);
+        chooseHitOrStay();
+
+        // 전부 다 over 되지 않은 경우에만 dealerGetCard() 실행
+        if (this.over != numOfHands) {
+            System.out.printf("\n======= 딜러 =======\n현재 딜러 카드: %s", d.firstCard);
+
+            for (int i = 0; d.value < 17; i++) {
+                dealerGetCard();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (d.dBlackjack) return;     // 딜러 더이상 카드 안 받음
+
+            }
+        }
+
+        for (int z = 0; z < handsArr.length; z++) {
+
+            if (!handsArr[z].pOver) {
+
+                System.out.println();
+                payTake(z);
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        finalizeGame();
+
+    }
+
+
 }
